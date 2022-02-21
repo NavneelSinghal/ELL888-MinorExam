@@ -228,7 +228,8 @@ constant, so as to make the size of this problem small enough.
 \subsubsection{Experiments using some standard techniques}
 Firstly, a comment on the applicability of this method: note that in the mentioned algorithm, we assumed that we only have access to an oracle that learns weights from a graph (and it is called in
 the second part of the loop in our algorithm). Hence, this method is applicable for practically any scenario where we want to learn the weight matrix from data, no matter what the constraints
-on $\mf{w}$ that the oracle provides. However, it is not clear if the convergence is guaranteed.\nl
+on $\mf{w}$ that the oracle provides, or the form of the objective function (though if the dependence of the objective function on $x$ is not quadratic, it becomes a different problem ---
+however, the idea remains the same). However, it is not clear if the convergence is guaranteed.\nl
 To benchmark it, we shall use the approach in the following paper for the aforementioned oracle:
 
 \begin{itemize}
