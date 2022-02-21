@@ -178,7 +178,7 @@ neighbourhood, etc. The focus here is an undirected graph which implies that the
         \mf{x_n} = [\bullet, x_{n2}, \bullet, x_{n4}, \ldots, x_{nd}]
     \end{bmatrix}
 \end{align*}
-where some parts of the data are missing at random and $\bullet$ indicates missing data. Explain in detail how we can learn the graph matrix with missing data. Put a descriptive detail.
+where some parts of the data are missing at random and $\bullet$ indicates missing data. Explain in detail how we can learn the graph matrix with missing data (in descriptive detail).
 
 \subsection{Solution}
 I will mainly focus on solving this problem under smoothness constraints.
@@ -235,6 +235,10 @@ To benchmark how good it is, we shall use the approaches in the following two pa
 
 \subsection{Problem}
 
+Now consider a semi-supervised graph learning problem. With the data $\mf{X}$ sitting at $n$ vertices, we also have the label information for $k < n$ vertices. Simply, we have $\mf{X} \in \R^{n \times
+d}$ with label information for $k$ vertices $\mf{y} \in \{0, 1\}^k$. Explain in detail how can we learn the graph matrix integrating the label information. The dataset available is
+$\left(\{\mf{x}_i, y_i\}_{i = 1}^k, \{\mf{x}_j\}_{j = k + 1}^n\right)$.
+
 \subsection{Solution}
 
 
@@ -242,12 +246,21 @@ To benchmark how good it is, we shall use the approaches in the following two pa
 
 \subsection{Problem}
 
+Consider a massive data scenario, where $n$ and $d$ both are very large, and typically $n \gg d$. It is not possible to process the entire data every iteration. Explain how we can approach
+the graph learning problem under such a setting. (Hint: Stochastic gradient descent based approaches try to address such problems, where each iteration is performed considering only a small
+subset of the dataset, or a \emph{minibatch}).
+
 \subsection{Solution}
 
 
 \section{Heterogeneous data scenario}
 
 \subsection{Problem}
+
+Consider a heterogeneous data scenario, where the dataset $\mf{X}$ associated with vertices may belong to the set of reals $\R$, the set of integers $\mb{I}$, and categorical $\mb{C} = \{c_1,
+\ldots, c_k\}$. More concretely, $\mf{X} \in \R^{n \times d_r} \times \mb{I}^{n \times d_i} \times \mb{C}^{n \times d_c}$ and $d = d_r + d_i + d_c$. For example, $\mf{x}_1 = [x_{11}, x_{12},
+\ldots, x_{1d_r} \in \R, x_{1(d_r + 1)}, x_{1(d_r + 2)}, \ldots, x_{1(d_r + d_i)} \in \mb{I}, x_{1(d_r + d_i + 1)}, d_{1(d_r + d_i + 2)}, \ldots, x_{1(d_r + d_i + d_c)} \in \mb{C}]$. Explain in
+detail how we can learn a graph matrix with heterogeneous data setting (in descriptive detail).
 
 \subsection{Solution}
 
