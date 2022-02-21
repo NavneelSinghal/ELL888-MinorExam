@@ -1,0 +1,13 @@
+TODO: read papers and stuff
+
+1. most rudimentary thing: sample points from a distribution learnt from the data for which the feature is not present, feature by feature (can't directly take mean since it would lose the variance
+and might mess up the algorithm or sth). this assumes features are independent. if we want to add in feature dependencies, we can try to model feature relationships from the datapoints. pairwise or
+otherwise.
+
+2. similar to transduced learning? read about that. another idea: group data with similar labels together, perform clustering or something on the data, and learn the graph matrix using this.
+for the different label data, the graph matrix should show a strong dissimilarity, and for same label data, it should show a strong similarity. then assign labels on the basis of certain cutoffs
+    or something and then learn the graph matrix from that? or can we also have some data that is not so simple.
+
+3. learn subgraphs one at a time. apply a random permutation to the nodes each time, and then learn in chunks. think of more ways to combine subgraph information.
+
+4. no idea yet, but make if else stuff?
