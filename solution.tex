@@ -254,7 +254,7 @@ Since we are working under the assumption that the graph signal is smooth, we wi
 
 The implementation uses the base code found at \href{https://github.com/rodrigo-pena/graph-learning}{https://github.com/rodrigo-pena/graph-learning}, and it was retrieved from
 \href{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}. Some of the metrics that we
-want are already implemented there, but we used new metrics and they are self-implemented. The code author has released it for public use, and the license is included with the code in the code
+want are already implemented there, but we will are also using some new metrics and they are self-implemented. The code author has released it for public use, and the license is included with the code in the code
 directory.\nl
 
 For the following experiments, we have $n = 256, d = 4$. In the baseline, we assign the mean of the feature to the missing values. We use $k = 0.05$ and $k = 0.1$ (i.e., $5\%$ and $10\%$ of data
@@ -322,6 +322,8 @@ Now we will show how the learned graphs look like (for $k = 0.1$, baseline and o
     \includegraphics[width=0.45\textwidth]{images/10_percent_own_learned_graphs.png}
 \end{center}
 
+Some notable differences in the above figures are how our algorithm learns the far-above-far-left, far-above-middle, below-left and middle-slight-left structures in a manner close to the algorithm without imputed data.
+
 \newpage
 
 \section{Semi-supervised setting}
@@ -334,6 +336,10 @@ $\left(\{\mf{x}_i, y_i\}_{i = 1}^k, \{\mf{x}_j\}_{j = k + 1}^n\right)$.
 
 \subsection{Solution}
 
+\todo{Complete the solution}
+
+\newpage
+
 \section{Massive data setting}
 
 \subsection{Problem}
@@ -344,6 +350,37 @@ subset of the dataset, or a \emph{minibatch}).
 
 \subsection{Solution}
 
+The idea here will be similar to stochastic gradient descent. We will learn the graph in multiple iterations, and in each iteration, we shall randomly partition the set of vertices into blocks of size
+$b > d$ (i.e., $b$ vertices in each block), and learn the induced subgraph for each block separately. Then we shall add the contributions of these induced graphs in the final weight matrix.\nl
+Firstly, a note is in order. We are, for now, not picking these subgraphs in a very precise manner. After a few iterations of the above, we will have a sufficient amount of information in order to
+fill the weight matrix $\mf{A}$ completely, and using this information, we can refine our choice of subgraphs as time progresses. Ideally we would like to be able to learn subgraphs that can be
+embedded in a small neighbourhood (i.e., we roughly want to consider a subgraph where every vertex is in a certain distance of a certain vertex). We will look at it later if time permits. \todo{See
+if you get enough time to implement this}\nl
+Now we will look at how the time complexity scales with this approach.\nl
+Suppose we have a block size of $b$. $b$ shouldn't be so small that there is no neighbourhood of a vertex to be learnt, and it shouldn't be so large that it would lead us to prohibitive time
+or memory usage.\nl
+Note that we process $n/b \times b(b - 1)/2$ edges in each iteration. So the probability that an edge $e = (v_i, v_j)$ is processed in one iteration is $p = \frac{b - 1}{n - 1}$. The probability
+that there is at least one edge that is not processed after $k$ iterations is $(1 - p)^k$, so the probability that there is at least one vertex that is not processed is at most $\frac{n(n - 1)}{2}
+(1 - p)^k$. So it would take
+$\frac{n}{b} (2 \log n + c)$ iterations (for some constant $c$) to ensure that each edge has been processed (with a large enough probability). Let's suppose that learning the weight matrix takes time $f(n) \times n^2$. Then the time taken in an iteration
+is $c \frac{n}{b} (2 \log n + c) \times \frac{n}{b} \times f(b) \times b^2 = f(b) \times n^2 (2 \log n + c)$. This gives us a speedup of $\frac{f(b) (2 \log n + c)}{f(n)}$ in cases where $f$ is linear. Since $f$ is
+practically expected to be monotonically increasing, we will suffer a slowdown of at most $2 \log n + c$, which is not that bad. Even if $f(n) \approx \sqrt{n}$, we will have a net speedup in the
+end for small enough $b$. \todo{Results for this stuff, maybe call it a baseline?}\nl
+Now as noted before, after we have already found a matrix $\mf{A}$ using this method (or with fewer iterations but ensuring that all edges have been covered at least once), we can do the
+following: at each step, pick a vertex $v$ with the highest sum of weights that hasn't been chosen already (which can be a measure of how important the node is), and then pick $C > d$ of its neighbours such that the edges that join
+them to $v$ have the highest weights. Do this recursively until you have reach a certain threshold on the number of nodes. And for these nodes, learn the subgraph and update $W$ accordingly. Now
+once this has covered the entire graph, we can restart this process again and do this for a certain number of iterations until convergence.\nl
+The justification on why this approach should work is as follows:
+\begin{enumerate}
+    \item For large graphs, where $n \gg d$, we can expect that the neighbourhood of a node should be small enough. This is due to the intuition that these vertices can be embedded in a low
+        dimensional space.
+    \item In short, the algorithm tries to pick subgraphs that are roughly centered around important vertices. If there are no important vertices as such in the graph, then it is more or less equally
+        likely for any vertex to be picked, so in the limit of a large number of iterations, we should expect a probability to be picked as the first node of the subgraph to be proportional
+        to the sum of incident edge weights. For graphs where clustering is important, this will also try to take into account such clusters.
+\end{enumerate}
+
+
+\newpage
 
 \section{Heterogeneous data scenario}
 
@@ -356,5 +393,6 @@ detail how we can learn a graph matrix with heterogeneous data setting (in descr
 
 \subsection{Solution}
 
+TODO
 
 \end{document}
