@@ -153,6 +153,8 @@ roundcorner=4pt}
 \maketitle
 \tableofcontents
 
+\setcounter{section}{-1}
+
 \section{Graph learning setting}
 
 You are given $\mf{X} \in \R^{n \times d}$ whose rows reside on the vertices of an unknown graph.
@@ -336,7 +338,22 @@ $\left(\{\mf{x}_i, y_i\}_{i = 1}^k, \{\mf{x}_j\}_{j = k + 1}^n\right)$.
 
 \subsection{Solution}
 
-\todo{Complete the solution}
+For this problem, the first idea is to enforce that $w_{ij} = 0$ for vertices $v_i, v_j$ with different labels. A more sophisticated view of this is to penalize the $w_{ij}$ for such vertices
+with a separate regularization term, rather than forcing them to be $0$, since that will lead to a more flexible model in general, if we do not want to predict the labels themselves and
+need to learn the graph structure only (i.e., in the case that reconstructing labels might not be the task that we need the graph for). This is equivalent to the following: we construct a graph with
+three parts: the part with all vertices having pre-assigned label $0$, another part with all vertices with pre-assigned label $1$, and the final part with vertices whose labels we don't know. As the
+penalties on the edges between part $1$ and part $2$ tends to $\infty$, the learned graph tends to a graph where there are no edges between parts $1$ and $2$.\nl
+A more sophisticated method would be to do the following iteratively (with increasing penalties $\to \infty$ and decreasing $r \to 1$): after learning this graph, for each unlabelled vertex, compute
+the average weight of edges between this vertex and all vertices with label $0$, and similarly the average weight of edges between this vertex and all vertices with label $1$. If the ratio between
+the larger of these to the smaller of these exceeds $r$, assign the label corresponding to the smaller average weight to this vertex, and otherwise leave it unlabelled. Do this while
+there is at least one vertex that is not assigned.
+We can ensure that at least one vertex is classified in each iteration (to ensure termination) by taking replacing $r$ with the minimum of $r$ and the minimum ratio at this step, apart from the
+update on $r$.\nl
+A large penalty would lead to a more pronounced difference between the sets of vertices, however it would also unnecessarily give a lot of weightage to the label information if it were to be
+used at a point in time when we don't have a sufficiently large set of labelled points. Hence we will use a large penalty only when there is a small number of vertices whose label information is not
+available. In any case, if we really want to learn the labels of the graph, we can always put an infinite penalty by enforcing certain $w_{ij}$'s to be zero.
+
+\todo{Implement}
 
 \newpage
 
@@ -354,9 +371,8 @@ The idea here will be similar to stochastic gradient descent. We will learn the 
 $b > d$ (i.e., $b$ vertices in each block), and learn the induced subgraph for each block separately. Then we shall add the contributions of these induced graphs in the final weight matrix.\nl
 Firstly, a note is in order. We are, for now, not picking these subgraphs in a very precise manner. After a few iterations of the above, we will have a sufficient amount of information in order to
 fill the weight matrix $\mf{A}$ completely, and using this information, we can refine our choice of subgraphs as time progresses. Ideally we would like to be able to learn subgraphs that can be
-embedded in a small neighbourhood (i.e., we roughly want to consider a subgraph where every vertex is in a certain distance of a certain vertex). We will look at it later if time permits. \todo{See
-if you get enough time to implement this}\nl
-Now we will look at how the time complexity scales with this approach.\nl
+embedded in a small neighbourhood (i.e., we roughly want to consider a subgraph where every vertex is in a certain distance of a certain vertex). We will look at it later.\nl
+Now we will look at how the time complexity scales with the random approach.\nl
 Suppose we have a block size of $b$. $b$ shouldn't be so small that there is no neighbourhood of a vertex to be learnt, and it shouldn't be so large that it would lead us to prohibitive time
 or memory usage.\nl
 Note that we process $n/b \times b(b - 1)/2$ edges in each iteration. So the probability that an edge $e = (v_i, v_j)$ is processed in one iteration is $p = \frac{b - 1}{n - 1}$. The probability
@@ -373,12 +389,13 @@ once this has covered the entire graph, we can restart this process again and do
 The justification on why this approach should work is as follows:
 \begin{enumerate}
     \item For large graphs, where $n \gg d$, we can expect that the neighbourhood of a node should be small enough. This is due to the intuition that these vertices can be embedded in a low
-        dimensional space.
+        dimensional space. If we are allowed to make an assumption that most interactions concerning a vertex are fairly local, we expect this approach to work better too.
     \item In short, the algorithm tries to pick subgraphs that are roughly centered around important vertices. If there are no important vertices as such in the graph, then it is more or less equally
         likely for any vertex to be picked, so in the limit of a large number of iterations, we should expect a probability to be picked as the first node of the subgraph to be proportional
         to the sum of incident edge weights. For graphs where clustering is important, this will also try to take into account such clusters.
 \end{enumerate}
 
+\todo{Implement}
 
 \newpage
 
@@ -393,6 +410,21 @@ detail how we can learn a graph matrix with heterogeneous data setting (in descr
 
 \subsection{Solution}
 
-TODO
+Building upon my answer to the second problem, we can note that for categorical features, we can apply the same ideas here as well. That is,
+and add high penalties for weights of edges with endpoints belonging to different classes. It is not necessary to look at the ratios here, since we aren't trying to interpolate the features in
+any manner, as they are given to us already.\nl
+Now we need to also take care of integer data. I will make a crucial
+assumption here (which should be taken care of before categorizing the data into integer and real data): all integer features represent data on a scale that we don't know about (and thus we can only talk
+about their relative ranks rather than their actual magnitudes).\nl
+This is because otherwise (for instance in the case where the feature corresponds to a count of something) we could have relaxed the
+assumption that they were integers and used the standard formulation for reals instead. Some cases where this relaxation isn't justified is in the case where we have data from scales that
+we can't quantify (for example, in a setting where the data consists of results of a questionnaire and the answer $1$ to a question corresponds to ``highly disagree'' while the answer $5$
+corresponds to ``highly agree'').\nl
+For such data, we can use some properties of their distribution rather than these values themselves, since only the ordering matters. In particular, properties like median and mode are much
+more relevant in such a scenario. Hence, we will replace these features by their quantiles and then treat them as real features. This makes more sense, since in such an example, it makes more
+sense to talk quantitatively about the difference between a person whose
+response to a question lies at the $10$-th percentile, the $30$-th percentile, or the $50$-th percentile, rather than talk quantitatively about a person who answered $1$, $2$ or $3$.\nl
+
+\todo{Implement}
 
 \end{document}
