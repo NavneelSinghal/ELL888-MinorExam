@@ -348,10 +348,36 @@ the average weight of edges between this vertex and all vertices with label $0$,
 the larger of these to the smaller of these exceeds $r$, assign the label corresponding to the smaller average weight to this vertex, and otherwise leave it unlabelled. Do this while
 there is at least one vertex that is not assigned.
 We can ensure that at least one vertex is classified in each iteration (to ensure termination) by taking replacing $r$ with the minimum of $r$ and the minimum ratio at this step, apart from the
-update on $r$.\nl
+update on $r$ (we can speed this up by ensuring that we choose multiple vertices at each step rather than just one vertex).\nl
 A large penalty would lead to a more pronounced difference between the sets of vertices, however it would also unnecessarily give a lot of weightage to the label information if it were to be
 used at a point in time when we don't have a sufficiently large set of labelled points. Hence we will use a large penalty only when there is a small number of vertices whose label information is not
-available. In any case, if we really want to learn the labels of the graph, we can always put an infinite penalty by enforcing certain $w_{ij}$'s to be zero.
+available. In any case, if we really want to learn the labels of the graph, we can always put an infinite penalty by enforcing certain $w_{ij}$'s to be zero, which is incidentally what we will be
+doing in the example.
+
+\subsubsection{Experiment}
+
+In this example, we will look at how a graph with two clusters can be learnt via this method. The metric would be somewhat indirect, since there is no obvious metric in this case for seeing how well the graph is
+learnt apart from looking at how well the labels are predicted using the algorithm.\nl
+Hence we will consider a semi-supervised binary node classification problem in a transductive setting.
+
+We will look at varying values of $k$, and do the following comparisons:
+
+\begin{enumerate}
+    \item For some subset (of varying sizes) of the nodes, incorporate the label information into the graph learning as explained above as well as learn the graph without incorporating the
+        label information, and compare certain metrics of the classification phase on these learned graphs.
+    \item For these subsets, also compare the metrics on the labels that we have learnt.
+\end{enumerate}
+
+For this, we will use a two-step method: firstly the graph learning (which is our main objective), and then a node-classification algorithm (like GCN) in a semi-supervised setting (using the
+original labels).\nl
+To this end, the pipeline will look like this:
+\begin{enumerate}
+    \item For a given graph, use the same algorithm used in problem 1 to learn the graph.
+    \item Run label propagation on the learned graph to find the labels.
+\end{enumerate}
+The dataset would again be synthetically generated as in problem 1.\nl
+% node class depends on (x - x')^2 + (y - y')^2
+To modify the algorithm, we will need to ensure that $w_{ij} = 0$ for certain weights.
 
 \todo{Implement}
 
@@ -393,6 +419,15 @@ The justification on why this approach should work is as follows:
     \item In short, the algorithm tries to pick subgraphs that are roughly centered around important vertices. If there are no important vertices as such in the graph, then it is more or less equally
         likely for any vertex to be picked, so in the limit of a large number of iterations, we should expect a probability to be picked as the first node of the subgraph to be proportional
         to the sum of incident edge weights. For graphs where clustering is important, this will also try to take into account such clusters.
+\end{enumerate}
+
+\subsubsection{Experiment}
+
+We will do two experiments here: the data will be synthetic here as well (and we will use the same method as done in problem 1). The idea will be the following:
+\begin{enumerate}
+    \item For a not-so-large dataset, compare the results of directly learning the underlying graph as well as the result of running the above algorithm (both variants: the one with random
+        minibatches as well as the one where we also pick neighbourhoods of vertices).
+    \item For a larger dataset, compare the runtimes for different hyperparameters (like batch size etc).
 \end{enumerate}
 
 \todo{Implement}
