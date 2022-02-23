@@ -305,13 +305,13 @@ Then we have the following
 \end{center}
 
 \begin{center}
-\includegraphics[width=0.70\textwidth]{images/5_percent_own_spectrum.png}\\
+\includegraphics[width=0.70\textwidth]{images/p1/5_percent_own_spectrum.png}\\
 Spectrum for $k = 0.05$\\
-\includegraphics[width=0.70\textwidth]{images/5_percent_baseline_spectrum.png}\\
+\includegraphics[width=0.70\textwidth]{images/p1/5_percent_baseline_spectrum.png}\\
 Baseline spectrum for $k = 0.05$\\
-\includegraphics[width=0.70\textwidth]{images/10_percent_own_spectra.png}\\
+\includegraphics[width=0.70\textwidth]{images/p1/10_percent_own_spectra.png}\\
 Spectrum for $k = 0.1$\\
-\includegraphics[width=0.70\textwidth]{images/10_percent_baseline_spectra.png}\\
+\includegraphics[width=0.70\textwidth]{images/p1/10_percent_baseline_spectra.png}\\
 Baseline spectrum for $k = 0.1$\\
 \end{center}
 
@@ -320,8 +320,8 @@ As we can see in the above plots of the eigenvalues, our algorithm matches the e
 Now we will show how the learned graphs look like (for $k = 0.1$, baseline and our algorithm respectively):
 
 \begin{center}
-    \includegraphics[width=0.45\textwidth]{images/10_percent_baseline_learned_graphs.png}
-    \includegraphics[width=0.45\textwidth]{images/10_percent_own_learned_graphs.png}
+    \includegraphics[width=0.45\textwidth]{images/p1/10_percent_baseline_learned_graphs.png}
+    \includegraphics[width=0.45\textwidth]{images/p1/10_percent_own_learned_graphs.png}
 \end{center}
 
 Some notable differences in the above figures are how our algorithm learns the far-above-far-left, far-above-middle, below-left and middle-slight-left structures in a manner close to the algorithm without imputed data.
@@ -338,8 +338,9 @@ $\left(\{\mf{x}_i, y_i\}_{i = 1}^k, \{\mf{x}_j\}_{j = k + 1}^n\right)$.
 
 \subsection{Solution}
 
-For this problem, the first idea is to enforce that $w_{ij} = 0$ for vertices $v_i, v_j$ with different labels. A more sophisticated view of this is to penalize the $w_{ij}$ for such vertices
-with a separate regularization term, rather than forcing them to be $0$, since that will lead to a more flexible model in general, if we do not want to predict the labels themselves and
+For this problem, the first idea is to enforce that $w_{ij} = 0$ for vertices $v_i, v_j$ with different labels. An alternate view of this is to penalize the $w_{ij}$ for such vertices
+with a regularization term in the form of, for example, altering the pairwise distance matrix of the node data (setting the distance to some large constant), rather than forcing the $w_{ij}$ to be $0$, since that will lead to a more
+flexible model in general; both in terms of being easy to incorporate in usual graph learning techniques, as well as being applicable to the (perhaps rare) case where we do not want to predict the labels themselves and
 need to learn the graph structure only (i.e., in the case that reconstructing labels might not be the task that we need the graph for). This is equivalent to the following: we construct a graph with
 three parts: the part with all vertices having pre-assigned label $0$, another part with all vertices with pre-assigned label $1$, and the final part with vertices whose labels we don't know. As the
 penalties on the edges between part $1$ and part $2$ tends to $\infty$, the learned graph tends to a graph where there are no edges between parts $1$ and $2$.\nl
@@ -368,18 +369,92 @@ We will look at varying values of $k$, and do the following comparisons:
     \item For these subsets, also compare the metrics on the labels that we have learnt.
 \end{enumerate}
 
-For this, we will use a two-step method: firstly the graph learning (which is our main objective), and then a node-classification algorithm (like GCN) in a semi-supervised setting (using the
-original labels).\nl
+For this, we will use a two-step method: firstly the graph learning (which is our main objective), and then a node-classification algorithm (like label propagation) in a semi-supervised setting (using the original labels).\nl
 To this end, the pipeline will look like this:
 \begin{enumerate}
     \item For a given graph, use the same algorithm used in problem 1 to learn the graph.
     \item Run label propagation on the learned graph to find the labels.
 \end{enumerate}
 The dataset would again be synthetically generated as in problem 1.\nl
-% node class depends on (x - x')^2 + (y - y')^2
-To modify the algorithm, we will need to ensure that $w_{ij} = 0$ for certain weights.
+The same acknowledgement of code as done in question 1 holds here too.
+We shall use the two-moons dataset for classification.\nl
 
-\todo{Implement}
+Now we show what happens for $k = 0.05, 0.1$ and $0.2$ respectively.
+
+\subsubsection{Results}
+
+The data is as shown:\nl
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{images/p2/ground_truth.png}\nl
+    \includegraphics[width=0.25\textwidth]{images/p2/labels.png}\nl
+    \includegraphics[width=0.5\textwidth]{images/p2/signals.png}\nl
+\end{center}
+
+Now we show the results for different $k$.
+
+\begin{enumerate}
+    \item $k = 0.05$
+        \begin{center}
+            % \includegraphics{images/p2/5_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.826 & 0.826 & 0.174 \\
+                \hline
+                Accuracy & 0.852 & 0.852 & 0.519 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/5_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/5_percent_predicted_labels.png}
+        \end{center}
+        \newpage
+    \item $k = 0.1$
+        \begin{center}
+            % \includegraphics{images/p2/10_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.834 & 0.812 & 0.186 \\
+                \hline
+                Accuracy & 0.855 & 0.840 & 0.523 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/10_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/10_percent_predicted_labels.png}
+        \end{center}
+    \newpage
+
+    \item $k = 0.2$
+        \begin{center}
+            % \includegraphics{images/p2/20_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.988 & 0.980 & 0.366 \\
+                \hline
+                Accuracy & 0.988 & 0.980 & 0.589 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/20_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p2/20_percent_predicted_labels.png}
+        \end{center}
+
+\end{enumerate}
 
 \newpage
 
