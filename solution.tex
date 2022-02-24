@@ -227,7 +227,7 @@ Note that if a fraction $k$ of the data was missing, then in the quadratic progr
 large number of variables. A variant of the above method would be to optimize over these unknown variables in batches (similar to stochastic gradient descent) while keeping the other variables
 constant, so as to make the size of this problem small enough.
 
-\subsubsection{Experiments using some standard techniques}
+\subsubsection{Experiment}
 Firstly, a comment on the applicability of this method: note that in the mentioned algorithm, we assumed that we only have access to an oracle that learns weights from a graph (and it is called in
 the second part of the loop in our algorithm). Hence, this method is applicable for practically any scenario where we want to learn the weight matrix from data, no matter what the constraints
 on $\mf{w}$ that the oracle provides, or the form of the objective function (though if the dependence of the objective function on $x$ is not quadratic, it becomes a different problem ---
@@ -258,6 +258,8 @@ The implementation uses the base code found at \href{https://github.com/rodrigo-
 \href{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}. Some of the metrics that we
 want are already implemented there, but we will are also using some new metrics and they are self-implemented. The code author has released it for public use, and the license is included with the code in the code
 directory.\nl
+
+\subsubsection{Results}
 
 For the following experiments, we have $n = 256, d = 4$. In the baseline, we assign the mean of the feature to the missing values. We use $k = 0.05$ and $k = 0.1$ (i.e., $5\%$ and $10\%$ of data
 missing respectively) in two independent sets of experiments to show the differences between this and the baseline.
@@ -482,7 +484,7 @@ that there is at least one edge that is not processed after $k$ iterations is $(
 $\frac{n}{b} (2 \log n + c)$ iterations (for some constant $c$) to ensure that each edge has been processed (with a large enough probability). Let's suppose that learning the weight matrix takes time $f(n) \times n^2$. Then the time taken in an iteration
 is $c \frac{n}{b} (2 \log n + c) \times \frac{n}{b} \times f(b) \times b^2 = f(b) \times n^2 (2 \log n + c)$. This gives us a speedup of $\frac{f(b) (2 \log n + c)}{f(n)}$ in cases where $f$ is linear. Since $f$ is
 practically expected to be monotonically increasing, we will suffer a slowdown of at most $2 \log n + c$, which is not that bad. Even if $f(n) \approx \sqrt{n}$, we will have a net speedup in the
-end for small enough $b$. \todo{Results for this stuff, maybe call it a baseline?}\nl
+end for small enough $b$.\nl
 Now as noted before, after we have already found a matrix $\mf{A}$ using this method (or with fewer iterations but ensuring that all edges have been covered at least once), we can do the
 following: at each step, pick a vertex $v$ with the highest sum of weights that hasn't been chosen already (which can be a measure of how important the node is), and then pick $C > d$ of its neighbours such that the edges that join
 them to $v$ have the highest weights. Do this recursively until you have reach a certain threshold on the number of nodes. And for these nodes, learn the subgraph and update $W$ accordingly. Now
@@ -502,10 +504,53 @@ We will do two experiments here: the data will be synthetic here as well (and we
 \begin{enumerate}
     \item For a not-so-large dataset, compare the results of directly learning the underlying graph as well as the result of running the above algorithm (both variants: the one with random
         minibatches as well as the one where we also pick neighbourhoods of vertices).
-    \item For a larger dataset, compare the runtimes for different hyperparameters (like batch size etc).
 \end{enumerate}
 
-\todo{Implement}
+The dataset will be sensor networks again. We will look at the following cases with a given number of total passes over data:
+
+\begin{enumerate}
+    \item All the passes are allocated to the random batch picking (i.e., in this case we have no iterations of the guided type).
+    \item Half the passes are allocated to the random batch picking and the other half to the guided type.
+\end{enumerate}
+
+For this example, we will use $N = 256$, $B = 64$, and $C = 20$ ($C$ chosen via hyperparameter tuning).\nl
+
+\begin{center}
+    \includegraphics[width=0.7\textwidth]{images/p3/ground_truth_graph.png}\nl
+    \includegraphics[width=0.7\textwidth]{images/p3/sample_smooth_signals.png}
+\end{center}
+
+\subsubsection{Results}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+            & No batch processing & Random batches & Random and guided batches\\
+        \hline
+        Edge existence F1-score & 0.70 & 0.71 & 0.74 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+The following are the learned graphs and the spectra for
+\begin{enumerate}
+    \item Random batches:
+        \begin{center}
+            \includegraphics[width=0.9\textwidth]{images/p3/random_learned_graphs.png}\\
+            \includegraphics[width=0.9\textwidth]{images/p3/random_spectrum.png}
+        \end{center}
+    \item Random and guided batches:
+        \begin{center}
+            \includegraphics[width=0.9\textwidth]{images/p3/half_guided_learned_graphs.png}\\
+            \includegraphics[width=0.9\textwidth]{images/p3/half_guided_spectrum.png}
+        \end{center}
+\end{enumerate}
+
+Note that using a batch approach, we are also able to get a better fit to the spectrum of the ground-truth graphs (and a guided approach outperforms the random batch approach as well)
+compared to the approach that learns the whole graph at once (however, this might just be specific to this dataset).\nl
+More specifically, the L2 norm of vector of the differences between the eigenvalues
+of the learned graph (without batches) and the ground-truth graph is $9.80$, for that between the random batch learned graph and the ground-truth graph is $1.32$, and for that between the guided
+learned graph and the ground truth graph is $0.83$.
 
 \newpage
 
@@ -535,6 +580,9 @@ more relevant in such a scenario. Hence, we will replace these features by their
 sense to talk quantitatively about the difference between a person whose
 response to a question lies at the $10$-th percentile, the $30$-th percentile, or the $50$-th percentile, rather than talk quantitatively about a person who answered $1$, $2$ or $3$.\nl
 
-\todo{Implement}
+\subsubsection{Experiment}
+
+Note that here synthetic data might not make the cut.
+\todo{implement and add stuff}
 
 \end{document}
