@@ -15,6 +15,7 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{hyperref}
+\usepackage{fancyvrb}
 
 \usepackage{thmtools}
 \usepackage{enumitem}
@@ -582,7 +583,117 @@ response to a question lies at the $10$-th percentile, the $30$-th percentile, o
 
 \subsubsection{Experiment}
 
-Note that here synthetic data might not make the cut.
-\todo{implement and add stuff}
+We will use a similar dataset as in the solution to problem 2. We will augment it with some integer features based on certain thresholds of certain function values on the vertex coordinates
+(which will be roughly a smooth signal).\nl
+
+We will compare the results to those of problem 2, since an obvious strategy to benchmark against is to get rid of all integer features. The experiment details will be identical as far as the
+other aspects are concerned.\nl
+
+\subsubsection{Results}
+The data is as shown:\nl
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{images/p4/smooth_signals.png}\nl
+    \includegraphics[width=0.5\textwidth]{images/p4/integer_values.png}\nl
+    \includegraphics[width=0.25\textwidth]{images/p4/labels.png}\nl
+\end{center}
+
+\newpage
+
+Now we show the results for different $k$.
+
+\begin{enumerate}
+    \item $k = 0.05$
+        \begin{center}
+            % \includegraphics{images/p4/5_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.874 & 0.857 & 0.149 \\
+                \hline
+                Accuracy & 0.886 & 0.875 & 0.508 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/5_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/5_percent_predicted_labels.png}
+        \end{center}
+        \newpage
+    \item $k = 0.1$
+        \begin{center}
+            % \includegraphics{images/p4/10_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.950 & 0.887 & 0.690 \\
+                \hline
+                Accuracy & 0.953 & 0.898 & 0.559 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/10_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/10_percent_predicted_labels.png}
+        \end{center}
+    \newpage
+
+    \item $k = 0.2$
+        \begin{center}
+            % \includegraphics{images/p4/20_percent_stats.png}
+            \begin{tabular}{|c|c|c|c|}
+                \hline
+                    & Our algorithm & Our algorithm and label propagation & Only label propagation\\
+                \hline
+                F1-score & 0.992 & 0.988 & 0.421 \\
+                \hline
+                Accuracy & 0.992 & 0.988 & 0.613 \\
+                \hline
+            \end{tabular}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/20_percent_learned_graphs.png}
+        \end{center}
+        \begin{center}
+            \includegraphics[width=0.75\textwidth]{images/p4/20_percent_predicted_labels.png}
+        \end{center}
+
+\end{enumerate}
+
+From this data, we can see that there is a drastic increase in the F1-score and accuracy as compared to the baseline (problem 2). There is also a marked increase in the edge quality of the
+learned graphs.
+
+\newpage
+
+\section{Code link}
+
+The code can be found at this \href{https://drive.google.com/file/d/1hmh8l6l2P_0l010Hoh3oqs5tPYvT6zth/view?usp=sharing}{link}:\nl
+\verb+https://drive.google.com/file/d/1hmh8l6l2P_0l010Hoh3oqs5tPYvT6zth/view?usp=sharing+.\nl
+Please refer to the README as far as the LICENSE is concerned.\nl
+
+The code for problem 1 is in the notebook \verb+demo_l2_degree_reg_missing_data.ipynb+.\nl
+The code for problem 2 is in the notebook \verb+demo_l2_degree_reg_semi_supervised.ipynb+. There were certain changes in the optimization algorithm that were needed to be made for this algorithm, and those changes can be
+seen in the new function \verb+l2_degree_reg_known_classes+ in the file \verb+learn_graph.py+.\nl
+The code for problem 3 is in the notebook \verb+demo_l2_degree_reg_big_data.ipynb+.\nl
+The code for problem 4 is in the notebook \verb+demo_l2_degree_reg_heterogeneous.ipynb+. The same changes as in problem 2 were needed to be made here as well.
+
+\section{References and base code source}
+
+The paper whose approach was used as the baseline graph learning approach for all problems was specified in problem 1.
+
+\begin{itemize}
+    \item Dong et al. ``Laplacian Matrix Learning for Smooth Graph Signal Representation''. ICASSP, 2015.
+\end{itemize}
+
+The implementation uses the base code found at \href{https://github.com/rodrigo-pena/graph-learning}{https://github.com/rodrigo-pena/graph-learning}, and it was retrieved from
+\href{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}{https://paperswithcode.com/paper/how-to-learn-a-graph-from-smooth-signals}. 
+Appropriate modifications and additions were made to the source code in order to implement the solutions to the problems.
+The code author has released it for public use, and the license is included with the code in the code
+directory.\nl
 
 \end{document}
